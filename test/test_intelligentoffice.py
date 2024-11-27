@@ -59,3 +59,12 @@ class TestIntelligentOffice(unittest.TestCase):
         system.manage_blinds_based_on_time()
         mock_servo.assert_called_with(2)
         self.assertFalse(system.blinds_open)
+
+    @patch.object(VEML7700, "lux", new_callable=PropertyMock)
+    @patch.object(GPIO, "output")
+    def test_should_turn_on_light(self, mock_light: Mock, mock_light_sensor: Mock):
+        mock_light_sensor.return_value = 499
+        system = IntelligentOffice()
+        system.manage_light_level()
+        mock_light.assert_called_with(system.LED_PIN, True)
+        self.assertTrue(system.light_on)
