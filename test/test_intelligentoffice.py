@@ -50,9 +50,11 @@ class TestIntelligentOffice(unittest.TestCase):
         mock_servo.assert_called_with(2)
         self.assertFalse(system.blinds_open)
 
+    @patch.object(GPIO, "input")
     @patch.object(IntelligentOffice, "change_servo_angle")
     @patch.object(SDL_DS3231, "read_datetime")
-    def test_should_not_open_blinds_if_sunday(self, mock_time_of_day: Mock, mock_servo: Mock):
+    def test_should_not_open_blinds_if_sunday(self, mock_time_of_day: Mock, mock_servo: Mock, mock_distance_sensor: Mock):
+        mock_distance_sensor.side_effect = [True, False, False, False]
         d = datetime(2024, 12, 1, 8, 0)
         mock_time_of_day.return_value = d
         system = IntelligentOffice()
@@ -60,19 +62,34 @@ class TestIntelligentOffice(unittest.TestCase):
         mock_servo.assert_called_with(2)
         self.assertFalse(system.blinds_open)
 
+    @patch.object(GPIO, "input")
     @patch.object(VEML7700, "lux", new_callable=PropertyMock)
     @patch.object(GPIO, "output")
-    def test_should_turn_on_light(self, mock_light: Mock, mock_light_sensor: Mock):
+    def test_should_turn_on_light(self, mock_light: Mock, mock_light_sensor: Mock, mock_distance_sensor: Mock):
+        mock_distance_sensor.side_effect = [True, False, False, False]
         mock_light_sensor.return_value = 499
         system = IntelligentOffice()
         system.manage_light_level()
         mock_light.assert_called_with(system.LED_PIN, True)
         self.assertTrue(system.light_on)
 
+    @patch.object(GPIO, "input")
     @patch.object(VEML7700, "lux", new_callable=PropertyMock)
     @patch.object(GPIO, "output")
-    def test_should_turn_off_light(self, mock_light: Mock, mock_light_sensor: Mock):
+    def test_should_turn_off_light(self, mock_light: Mock, mock_light_sensor: Mock, mock_distance_sensor: Mock):
+        mock_distance_sensor.side_effect = [True, False, False, False]
         mock_light_sensor.return_value = 551
+        system = IntelligentOffice()
+        system.manage_light_level()
+        mock_light.assert_called_with(system.LED_PIN, False)
+        self.assertFalse(system.light_on)
+
+    @patch.object(GPIO, "input")
+    @patch.object(VEML7700, "lux", new_callable=PropertyMock)
+    @patch.object(GPIO, "output")
+    def test_should_not_turn_on_light_if_office_empty(self, mock_light: Mock, mock_light_sensor: Mock, mock_distance_sensor:Mock):
+        mock_distance_sensor.side_effect = [False, False, False, False]
+        mock_light_sensor.return_value = 400
         system = IntelligentOffice()
         system.manage_light_level()
         mock_light.assert_called_with(system.LED_PIN, False)
