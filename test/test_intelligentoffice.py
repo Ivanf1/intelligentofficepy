@@ -15,3 +15,7 @@ class TestIntelligentOffice(unittest.TestCase):
         system = IntelligentOffice()
         occupied = system.check_quadrant_occupancy(system.INFRARED_PIN1)
         self.assertTrue(occupied)
+
+    def test_check_occupancy_raises_error(self):
+        system = IntelligentOffice()
+        self.assertRaises(IntelligentOfficeError, system.check_quadrant_occupancy, -1)
