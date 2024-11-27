@@ -69,9 +69,12 @@ class IntelligentOffice:
             self.blinds_open = False
 
     def manage_light_level(self) -> None:
-        # To be implemented
-        pass
-
+        if self.ambient_light_sensor.lux < 500:
+            GPIO.output(self.LED_PIN, True)
+            self.light_on = True
+        else:
+            GPIO.output(self.LED_PIN, False)
+            self.light_on = False
 
     def monitor_air_quality(self) -> None:
         # To be implemented
