@@ -61,9 +61,12 @@ class IntelligentOffice:
 
     def manage_blinds_based_on_time(self) -> None:
         current_time = self.rtc.read_datetime()
-        if current_time.hour >= 8:
+        if 8 <= current_time.hour < 20:
             self.change_servo_angle(12)
             self.blinds_open = True
+        else:
+            self.change_servo_angle(2)
+            self.blinds_open = False
 
     def manage_light_level(self) -> None:
         # To be implemented
